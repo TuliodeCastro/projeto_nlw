@@ -1,36 +1,39 @@
 import { getCustomRepository, Repository } from "typeorm";
-import { UsersRepository } from "../repositories/UsersRepository";
 import { User } from "../entities/User";
+import { UsersRepository } from "../repositories/UsersRepository";
 
-class UsersService{
-    private usersRepository: Repository<User>;
+class UsersService {
+  private usersRepository: Repository<User>;
 
-    constructor() {
-        this.usersRepository = getCustomRepository(UsersRepository);
+  constructor() {
+    this.usersRepository = getCustomRepository(UsersRepository);
+  }
+
+  async create(email: string) {
+
+    const userExists = await this.usersRepository.findOne({
+      email,
+    });
+
+    if (userExists) {
+      return userExists;
     }
 
-    async create(email: string) {
-        const userExists =  await this.usersRepository.findOne({
-            email
-        });
+    const user = this.usersRepository.create({
+      email,
+    });
 
-        if (userExists) {
-            return userExists;
-        }
+    await this.usersRepository.save(user);
 
-        const user = this.usersRepository.create({
-            email,
-        });
+    return user;
+  }
 
-        await this.usersRepository.save(user);
-
-        return user;
-    }
-    
-    async findByEmail(email: string) {
-        const user = await this.usersRepository.findOne( { email } );
-        return user;
-        }
+  async findByEmail(email: string) {
+    const user = await this.usersRepository.findOne({
+      email,
+    });
+    return user;
+  }
 }
 
-export { UsersService }
+export { UsersService };
